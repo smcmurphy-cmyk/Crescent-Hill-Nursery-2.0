@@ -1,0 +1,8 @@
+{
+  "name": "Crescent Hill Nursery Clone",
+  "description": "A modern reimagining of the Crescent Hill Nursery website featuring a native plant catalog, mail-order services, newsletter, contact page, and events calendar.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
