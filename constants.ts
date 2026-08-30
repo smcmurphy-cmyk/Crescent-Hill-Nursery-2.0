@@ -1,77 +1,5 @@
-import { Plant, PlantCategory, Service, Page, FloralArrangement, NewsletterArchive } from './types';
+import { Plant, PlantCategory, Page, NewsletterArchive } from './types';
 
-export const FLORAL_ARRANGEMENTS: FloralArrangement[] = [
-  {
-    id: 'fa1',
-    name: 'Desert Dawn',
-    price: 85,
-    description: 'A striking mix of Proteas, structural succulents, and silvery eucalyptus foliage.',
-    imageUrl: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'fa2',
-    name: 'Rolling Hills Meadow',
-    price: 65,
-    description: 'Vibrant native wildflowers and delicate grasses inspired by our local landscape.',
-    imageUrl: 'https://images.unsplash.com/photo-1596541230113-68f44d852a4e?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'fa3',
-    name: 'Crescent Moon White',
-    price: 95,
-    description: 'Elegant white lilies, moon-white roses, and deep green bay laurel leaves.',
-    imageUrl: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'fa4',
-    name: 'Mediterranean Mist',
-    price: 75,
-    description: 'Fragrant French lavender, dried olive branches, and pale blue thistle.',
-    imageUrl: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'fa5',
-    name: 'California Poppy Glow',
-    price: 55,
-    description: 'A cheerful sun-drenched bunch of seasonal orange and yellow native blooms.',
-    imageUrl: 'https://images.unsplash.com/photo-1591886111029-7c858b2913e2?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'fa6',
-    name: 'The Heirloom Garden',
-    price: 110,
-    description: 'Our most lush selection: antique roses, heavy-headed peonies, and trailing ivy.',
-    imageUrl: 'https://images.unsplash.com/photo-1464306311820-53247f482c3d?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'fa7',
-    name: 'Sage & Stone',
-    price: 45,
-    description: 'A minimalist architectural piece featuring air plants, river stones, and sage stems.',
-    imageUrl: 'https://images.unsplash.com/photo-1509423350716-97f9360b4e09?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'fa8',
-    name: 'Wildwood Whimsy',
-    price: 80,
-    description: 'Woodland ferns, moss-covered branches, and delicate white starflowers.',
-    imageUrl: 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'fa9',
-    name: 'Protea Power',
-    price: 125,
-    description: 'A grand centerpiece featuring three King Proteas and dramatic native foliage.',
-    imageUrl: 'https://images.unsplash.com/photo-1595131838586-4447bc79f539?auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 'fa10',
-    name: 'Coastal Breeze',
-    price: 60,
-    description: 'Sea-blue flax lily berries, salt-tolerant grasses, and driftwood accents.',
-    imageUrl: 'https://images.unsplash.com/photo-1563241527-3004b7be0fab?auto=format&fit=crop&w=600&q=80'
-  }
-];
 
 export const MOCK_PLANTS: Plant[] = [
   // ABUTILON
@@ -4404,30 +4332,6 @@ export const MOCK_PLANTS: Plant[] = [
     hardinessZone: 'USDA Zones 8–10',
     bloomTime: 'Late Summer to Frost',
     soilNeeds: 'Lean, well-draining rocky or sandy soil'
-  }
-];
-
-export const SERVICES: Service[] = [
-  {
-    id: 's1',
-    title: 'Mail Order Items',
-    description: 'We ship a curated selection of our best plants and arrangements nationwide. Visit the link for the full collection of mail order items and order online.',
-    iconName: 'Package',
-    page: Page.MAIL_ORDER
-  },
-  {
-    id: 's2',
-    title: 'Wholesale Plants and Cut Flowers',
-    description: 'Have a wholesale license? Complete the wholesaler application in the link to get started working with Crescent Hill Nursery.',
-    iconName: 'Truck',
-    page: Page.WHOLESALE
-  },
-  {
-    id: 's3',
-    title: 'Garden Consultation',
-    description: 'Let our experts visit your site to suggest the best plant selections for your specific soil and light conditions.',
-    iconName: 'Users',
-    page: Page.CONSULTATION
   }
 ];
 

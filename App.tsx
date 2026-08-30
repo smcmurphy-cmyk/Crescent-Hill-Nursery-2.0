@@ -1,16 +1,13 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Page, FloralArrangement } from './types';
+import React, { useState, useEffect } from 'react';
+import { Page } from './types';
 import { Navbar, Logo, FramedEmblemLogo } from './components/Navbar';
 import { PlantCatalog } from './components/PlantCatalog';
-import { DroughtResistance } from './components/DroughtResistance';
-import { PlantingCalendar } from './components/PlantingCalendar';
-import { NativeSpeciesMap } from './components/NativeSpeciesMap';
-import { SustainabilityPolicy } from './components/SustainabilityPolicy';
 import { AvailabilityList } from './components/AvailabilityList';
 import { EventsCalendar } from './components/EventsCalendar';
 import { PlantDetailView } from './components/PlantDetailView';
 import { HeroSection } from './components/HeroSection';
-import { SERVICES, MOCK_PLANTS, FLORAL_ARRANGEMENTS } from './constants';
+import { TradeSignInModal } from './components/TradeSignInModal';
+import { MOCK_PLANTS } from './constants';
 import { 
   ArrowRight, 
   MapPin, 
@@ -48,76 +45,44 @@ import {
 const App: React.FC = () => {
   const [currentPage, setPage] = useState<Page>(Page.HOME);
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
-  const [cart, setCart] = useState<FloralArrangement[]>([]);
-  const [checkoutStep, setCheckoutStep] = useState<'info' | 'payment' | 'success'>('info');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
-  const [lastAddedItem, setLastAddedItem] = useState<string | null>(null);
   const [showPricedModal, setShowPricedModal] = useState(false);
+  const [showTradeSignInModal, setShowTradeSignInModal] = useState(false);
+  const [tradeAuth, setTradeAuth] = useState<{ companyName: string; authenticated: boolean } | null>(() => {
+    try {
+      const savedSession = sessionStorage.getItem('crescent_trade_auth') || localStorage.getItem('crescent_trade_auth');
+      if (savedSession) {
+        const parsed = JSON.parse(savedSession);
+        if (parsed?.authenticated && parsed?.companyName) {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return null;
+  });
 
   // Social Links
   const INSTAGRAM_URL = "https://www.instagram.com/crescent_hill_nursery_?igsh=NTc4MTIwNjQ2TQ==";
   const FACEBOOK_URL = "https://www.facebook.com/crescenthillnursery/";
   const TIKTOK_URL = "#"; 
 
-  // Cart logic
-  const addToCart = (item: FloralArrangement) => {
-    setCart(prev => [...prev, item]);
-    setLastAddedItem(item.name);
-    setTimeout(() => setLastAddedItem(null), 2000);
-  };
-
-  const removeFromCart = (index: number) => {
-    setCart(prev => prev.filter((_, i) => i !== index));
-    if (cart.length <= 1) setIsMobileCartOpen(false);
-  };
-
-  const handleCartIconClick = () => {
-    if (currentPage !== Page.MAIL_ORDER) {
-      setPage(Page.MAIL_ORDER);
-      // Give the page a moment to render before opening the mobile drawer
-      setTimeout(() => setIsMobileCartOpen(true), 100);
-    } else {
-      setIsMobileCartOpen(true);
-    }
-  };
-
-  const cartTotal = useMemo(() => {
-    return cart.reduce((sum, item) => sum + item.price, 0);
-  }, [cart]);
-
-  const finalTotal = useMemo(() => {
-    return cartTotal + (cartTotal > 150 || cartTotal === 0 ? 0 : 15);
-  }, [cartTotal]);
-
-  // Handle simulated payment
-  const handlePayment = () => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      setCheckoutStep('success');
-      setCart([]); 
-    }, 2500);
-  };
-
   useEffect(() => {
-    if (currentPage !== Page.CHECKOUT) {
-      setCheckoutStep('info');
-    }
     window.scrollTo(0, 0);
-    // Don't auto-close drawer when navigating to MAIL_ORDER if triggered by cart click
-    if (currentPage !== Page.MAIL_ORDER) {
-      setIsMobileCartOpen(false);
-    }
   }, [currentPage]);
 
-  const renderServiceIcon = (iconName: string) => {
-    const iconProps = { size: 32, strokeWidth: 1.5 };
-    switch (iconName) {
-      case 'Package': return <Package {...iconProps} />;
-      case 'Truck': return <Truck {...iconProps} />;
-      case 'Users': return <Users {...iconProps} />;
-      default: return null;
+  const handleNavigate = (page: Page) => {
+    if (page === Page.PRICED_AVAILABILITY && !tradeAuth?.authenticated) {
+      setShowTradeSignInModal(true);
+      return;
+    }
+    setPage(page);
+  };
+
+  const handleOpenLiveInventory = () => {
+    setShowPricedModal(false);
+    if (tradeAuth?.authenticated) {
+      setPage(Page.PRICED_AVAILABILITY);
+    } else {
+      setShowTradeSignInModal(true);
     }
   };
 
@@ -125,7 +90,7 @@ const App: React.FC = () => {
 
   const Hero = () => (
     <HeroSection 
-      setPage={setPage}
+      setPage={handleNavigate}
       setShowPricedModal={setShowPricedModal}
       FACEBOOK_URL={FACEBOOK_URL}
       INSTAGRAM_URL={INSTAGRAM_URL}
@@ -168,13 +133,11 @@ const App: React.FC = () => {
                 </h4>
                 <p className="text-xs text-stone-500 mb-4">View current inventory with container sizes, blooming conditions, and descriptions.</p>
                 <button 
-                  onClick={() => {
-                    setShowPricedModal(false);
-                    setPage(Page.AVAILABILITY);
-                  }}
-                  className="w-full bg-[#2a4521] hover:bg-[#1f3518] text-white text-xs font-semibold py-2.5 rounded-lg transition-colors cursor-pointer"
+                  onClick={handleOpenLiveInventory}
+                  className="w-full bg-[#2a4521] hover:bg-[#1f3518] text-white text-xs font-semibold py-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2"
                 >
-                  Open Live Inventory
+                  <Lock size={14} className="text-amber-300" />
+                  <span>Open Live Inventory</span>
                 </button>
               </div>
 
@@ -210,384 +173,11 @@ const App: React.FC = () => {
     );
   };
 
-  const ServicesPage = () => (
-    <div className="py-24 bg-stone-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 className="text-5xl font-serif font-bold text-crescent-green mb-6">Our Services</h2>
-          <div className="h-1 w-20 bg-crescent-accent mx-auto mb-8"></div>
-          <p className="text-stone-600 text-lg max-w-3xl mx-auto leading-relaxed">Beyond our plant catalog, we offer professional expertise to help your garden thrive in the local climate.</p>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-16">
-          {SERVICES.map((service) => (
-            <button 
-              key={service.id} 
-              onClick={() => setPage(service.page)}
-              className="group flex flex-col items-center text-center focus:outline-none transition-transform hover:-translate-y-2"
-            >
-              <div className="h-24 w-24 bg-crescent-green text-crescent-accent rounded-full flex items-center justify-center mb-8 shadow-xl group-hover:bg-crescent-accent group-hover:text-crescent-green transition-all duration-500 transform group-hover:rotate-12 border-4 border-white">
-                {renderServiceIcon(service.iconName)}
-              </div>
-              <h3 className="text-2xl font-serif font-bold text-gray-900 mb-5 group-hover:text-crescent-green transition-colors">{service.title}</h3>
-              <p className="text-stone-600 leading-loose mb-6">{service.description}</p>
-              <span className="text-crescent-accent font-bold uppercase tracking-widest text-sm border-b-2 border-crescent-accent group-hover:text-crescent-green group-hover:border-crescent-green transition-all">Learn More &rarr;</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const CheckoutPage = () => (
-    <div className="bg-stone-50 py-16">
-      <div className="max-w-5xl mx-auto px-4">
-        {checkoutStep !== 'success' && (
-          <button 
-            onClick={() => setPage(Page.MAIL_ORDER)} 
-            className="flex items-center gap-2 text-stone-500 hover:text-crescent-green mb-8 transition-colors"
-          >
-            <ChevronLeft size={20} /> Return to Shop
-          </button>
-        )}
-
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-stone-100">
-          {checkoutStep === 'success' ? (
-            <div className="p-16 text-center flex flex-col items-center">
-              <div className="w-24 h-24 bg-emerald-100 text-crescent-green rounded-full flex items-center justify-center mb-8 animate-bounce">
-                <ShieldCheck size={48} />
-              </div>
-              <h1 className="text-4xl font-serif font-bold text-gray-900 mb-4">Order Confirmed!</h1>
-              <p className="text-stone-600 mb-8 max-w-md leading-relaxed">
-                Thank you for supporting Crescent Hill Nursery. Your order <span className="font-bold text-crescent-green">#CH-{Math.floor(Math.random() * 90000) + 10000}</span> has been received and our team is preparing your selection for transit.
-              </p>
-              <div className="bg-stone-50 p-6 rounded-xl border border-stone-100 mb-10 w-full max-w-sm">
-                 <div className="flex items-center gap-4 text-left">
-                    <Sparkles className="text-crescent-accent" />
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-widest text-stone-400">Sage's Tip</p>
-                      <p className="text-sm text-stone-600 italic">"Ensure your new arrivals have plenty of indirect light for the first 48 hours to recover from their journey."</p>
-                    </div>
-                 </div>
-              </div>
-              <button 
-                onClick={() => setPage(Page.HOME)}
-                className="bg-crescent-green text-white font-bold px-10 py-4 rounded-lg hover:bg-black transition-all flex items-center gap-2"
-              >
-                Back to Home <ArrowRight size={20} />
-              </button>
-            </div>
-          ) : (
-            <div className="md:flex">
-              <div className="md:w-2/3 p-10 border-r border-stone-100">
-                <div className="flex items-center gap-4 mb-10">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${checkoutStep === 'info' ? 'bg-crescent-green text-white' : 'bg-emerald-100 text-crescent-green'}`}>1</div>
-                  <div className={`h-1 flex-grow rounded-full ${checkoutStep === 'payment' ? 'bg-emerald-100' : 'bg-stone-100'}`}></div>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${checkoutStep === 'payment' ? 'bg-crescent-green text-white' : 'bg-stone-100 text-stone-400'}`}>2</div>
-                </div>
-
-                {checkoutStep === 'info' ? (
-                  <div className="animate-in fade-in duration-500">
-                    <h2 className="text-2xl font-serif font-bold mb-8">Shipping Information</h2>
-                    <form className="space-y-6" onSubmit={e => { e.preventDefault(); setCheckoutStep('payment'); }}>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="col-span-2 sm:col-span-1">
-                          <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2">First Name</label>
-                          <input required type="text" className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg outline-none focus:ring-2 focus:ring-crescent-green/20" />
-                        </div>
-                        <div className="col-span-2 sm:col-span-1">
-                          <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2">Last Name</label>
-                          <input required type="text" className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg outline-none focus:ring-2 focus:ring-crescent-green/20" />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2">Email Address</label>
-                        <input required type="email" className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg outline-none focus:ring-2 focus:ring-crescent-green/20" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2">Shipping Address</label>
-                        <input required type="text" className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg outline-none focus:ring-2 focus:ring-crescent-green/20 mb-3" placeholder="Street Address" />
-                        <div className="grid grid-cols-3 gap-3">
-                           <input required type="text" className="col-span-1 bg-stone-50 border border-stone-200 p-3 rounded-lg outline-none focus:ring-2 focus:ring-crescent-green/20" placeholder="City" />
-                           <input required type="text" className="col-span-1 bg-stone-50 border border-stone-200 p-3 rounded-lg outline-none focus:ring-2 focus:ring-crescent-green/20" placeholder="State" />
-                           <input required type="text" className="col-span-1 bg-stone-50 border border-stone-200 p-3 rounded-lg outline-none focus:ring-2 focus:ring-crescent-green/20" placeholder="Zip" />
-                        </div>
-                      </div>
-                      <button type="submit" className="w-full bg-crescent-green text-white font-bold py-4 rounded-lg hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg">
-                        Continue to Payment <ArrowRight size={18} />
-                      </button>
-                    </form>
-                  </div>
-                ) : (
-                  <div className="animate-in slide-in-from-right-10 duration-500">
-                    <h2 className="text-2xl font-serif font-bold mb-2">Payment Details</h2>
-                    <p className="text-xs text-stone-400 mb-8 uppercase tracking-widest flex items-center gap-2">
-                       <Lock size={12} /> Secure encrypted checkout
-                    </p>
-
-                    <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl mb-8 flex items-center gap-4">
-                       <div className="bg-amber-100 p-2 rounded-full text-amber-600"><Sparkles size={18} /></div>
-                       <p className="text-xs text-amber-800 font-medium">Test Mode: You can use any dummy card details for this demonstration.</p>
-                    </div>
-
-                    <div className="space-y-6">
-                      <div className="p-6 border border-stone-200 rounded-xl bg-stone-50 relative overflow-hidden group">
-                         <div className="flex justify-between items-center mb-6">
-                            <CreditCard className="text-stone-300" size={32} />
-                            <div className="flex gap-1">
-                               <div className="w-6 h-4 bg-stone-200 rounded-sm"></div>
-                               <div className="w-6 h-4 bg-stone-200 rounded-sm"></div>
-                               <div className="w-6 h-4 bg-stone-200 rounded-sm"></div>
-                            </div>
-                         </div>
-                         <div className="space-y-4">
-                           <div>
-                              <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Card Number</label>
-                              <div className="bg-white border border-stone-200 p-3 rounded flex items-center gap-3">
-                                <span className="text-stone-300"><CreditCard size={18} /></span>
-                                <input type="text" placeholder="XXXX XXXX XXXX XXXX" className="w-full bg-transparent outline-none text-sm tracking-widest" />
-                              </div>
-                           </div>
-                           <div className="grid grid-cols-2 gap-4">
-                             <div>
-                               <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Expiry Date</label>
-                               <input type="text" placeholder="MM/YY" className="w-full bg-white border border-stone-200 p-3 rounded outline-none text-sm" />
-                             </div>
-                             <div>
-                               <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">CVC</label>
-                               <input type="text" placeholder="123" className="w-full bg-white border border-stone-200 p-3 rounded outline-none text-sm" />
-                             </div>
-                           </div>
-                         </div>
-                      </div>
-
-                      <div className="pt-4 space-y-4">
-                        <button 
-                          onClick={handlePayment}
-                          disabled={isProcessing}
-                          className="w-full bg-crescent-green text-white font-bold py-5 rounded-lg hover:bg-black transition-all flex items-center justify-center gap-3 shadow-xl disabled:opacity-75 disabled:cursor-not-allowed group"
-                        >
-                          {isProcessing ? (
-                            <>
-                              <Loader2 size={20} className="animate-spin" />
-                              Processing Payment...
-                            </>
-                          ) : (
-                            <>
-                              Complete Purchase — ${finalTotal.toFixed(2)}
-                              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                            </>
-                          )}
-                        </button>
-                        <button onClick={() => setCheckoutStep('info')} className="w-full text-stone-400 text-xs font-bold uppercase tracking-widest hover:text-stone-600 transition-colors">
-                          Go Back
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="md:w-1/3 bg-stone-50 p-10">
-                <h3 className="text-xl font-serif font-bold text-gray-900 mb-8 pb-4 border-b border-stone-200">Summary</h3>
-                <div className="space-y-4 mb-10 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                  {cart.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-start text-sm">
-                      <div className="flex gap-3">
-                        <div className="w-12 h-12 bg-white rounded border border-stone-200 overflow-hidden shrink-0">
-                          <img src={item.imageUrl} className="w-full h-full object-cover" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-stone-800 line-clamp-1">{item.name}</p>
-                          <p className="text-xs text-stone-400">Floral Arrangement</p>
-                        </div>
-                      </div>
-                      <span className="font-bold text-stone-600">${item.price}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-3 text-xs text-stone-500 font-medium">
-                  <div className="flex justify-between">
-                    <span>Merchandise Subtotal</span>
-                    <span className="text-stone-800">${cartTotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Shipping & Handling</span>
-                    <span className={cartTotal > 150 ? "text-emerald-600 font-bold" : "text-stone-800"}>
-                      {cartTotal > 150 ? 'FREE' : '$15.00'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Estimated Tax</span>
-                    <span className="text-stone-800">$0.00</span>
-                  </div>
-                  <div className="border-t border-stone-200 pt-6 mt-4 flex justify-between items-end">
-                    <div>
-                      <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Total Due</p>
-                      <p className="text-3xl font-serif font-bold text-crescent-green">${finalTotal.toFixed(2)}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-12 p-4 rounded-xl bg-white border border-stone-200">
-                  <div className="flex items-center gap-3 text-emerald-600 mb-2">
-                    <ShieldCheck size={20} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Growth Guarantee</span>
-                  </div>
-                  <p className="text-[9px] leading-relaxed text-stone-400">
-                    Your plants are covered by our 30-day health guarantee. If they don't thrive, we'll replace them at no cost.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const MailOrderPage = () => (
-    <div className="bg-stone-50 py-4 md:py-16">
-      <div className="max-w-7xl mx-auto px-4 relative">
-        <button onClick={() => setPage(Page.SERVICES)} className="flex items-center gap-2 text-stone-500 hover:text-crescent-green mb-8 transition-colors">
-          <ChevronLeft size={20} /> Back to Services
-        </button>
-        
-        {/* Added Notification Toast for feedback on mobile/desktop */}
-        {lastAddedItem && (
-          <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] bg-crescent-green text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
-            <CheckCircle size={20} className="text-crescent-accent" />
-            <span className="text-sm font-bold">Added {lastAddedItem}</span>
-          </div>
-        )}
-
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-stone-100 mb-8 md:mb-0">
-          <div className="md:flex min-h-[500px] md:h-[750px] relative">
-            
-            {/* LEFT SIDE: Items (Scrollable) */}
-            <div className={`w-full md:w-1/2 flex flex-col bg-stone-50 border-r border-stone-100 ${isMobileCartOpen ? 'hidden md:flex' : 'flex'}`}>
-              <div className="p-6 md:p-8 bg-crescent-green text-white shrink-0">
-                <h2 className="text-2xl md:text-3xl font-serif font-bold mb-1 md:mb-2">Signature Arrangements</h2>
-                <p className="text-emerald-100 text-xs md:text-sm opacity-80">Shipped fresh from our hill to your door.</p>
-              </div>
-              <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-4">
-                {FLORAL_ARRANGEMENTS.map((item) => (
-                  <div key={item.id} className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-stone-100 flex gap-4 group">
-                    <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-lg overflow-hidden">
-                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                    </div>
-                    <div className="flex-grow flex flex-col justify-center">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-serif font-bold text-base md:text-lg text-gray-900">{item.name}</h3>
-                        <span className="text-crescent-green font-bold text-xs md:text-sm bg-emerald-50 px-2 py-0.5 rounded">${item.price}</span>
-                      </div>
-                      <p className="text-[10px] md:text-xs text-stone-500 leading-relaxed line-clamp-2">{item.description}</p>
-                      <button 
-                        onClick={() => addToCart(item)}
-                        className="mt-2 text-[10px] font-bold uppercase tracking-widest text-crescent-accent hover:text-crescent-green flex items-center gap-1 transition-colors"
-                      >
-                        <Plus size={10} /> Add to Selection
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* RIGHT SIDE: Cart Drawer (Mobile slide-up or Desktop fixed side) */}
-            <div className={`
-              w-full md:w-1/2 p-6 md:p-10 bg-white flex flex-col
-              fixed inset-0 z-50 md:relative md:z-auto md:translate-y-0
-              ${isMobileCartOpen ? 'translate-y-0' : 'translate-y-full md:translate-y-0'}
-              transition-transform duration-300 ease-in-out
-            `}>
-              {/* Mobile Close Button */}
-              <button 
-                onClick={() => setIsMobileCartOpen(false)}
-                className="md:hidden absolute top-6 right-6 p-2 bg-stone-100 rounded-full text-stone-500 hover:text-stone-900 transition-colors"
-              >
-                <LucideX size={24} />
-              </button>
-
-              <div className="mb-6 md:mb-8 flex items-center justify-between border-b border-stone-100 pb-4 pr-12 md:pr-0">
-                <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-900 flex items-center gap-3">
-                  <ShoppingCart className="text-crescent-green" size={24} />
-                  Your Selection
-                </h2>
-                <span className="bg-crescent-light text-crescent-green px-3 py-1 rounded-full text-xs font-bold">
-                  {cart.length} {cart.length === 1 ? 'item' : 'items'}
-                </span>
-              </div>
-
-              <div className="flex-grow overflow-y-auto pr-2 space-y-3 mb-6">
-                {cart.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-stone-300 space-y-4">
-                    <Package size={48} strokeWidth={1} />
-                    <p className="text-sm font-light italic">Your box is currently empty...</p>
-                  </div>
-                ) : (
-                  cart.map((item, index) => (
-                    <div key={`${item.id}-${index}`} className="flex items-center justify-between group py-2 border-b border-stone-50 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded bg-stone-100 overflow-hidden">
-                          <img src={item.imageUrl} className="w-full h-full object-cover opacity-80" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-stone-700">{item.name}</p>
-                          <p className="text-[10px] text-stone-400 uppercase tracking-tighter">${item.price}</p>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => removeFromCart(index)}
-                        className="p-1.5 text-stone-300 hover:text-red-400 transition-colors"
-                      >
-                        <LucideX size={16} />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <div className="bg-stone-50 rounded-2xl p-4 md:p-6 border border-stone-100 mt-auto">
-                <div className="space-y-2 mb-4 md:mb-6 text-xs md:text-sm text-stone-500">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span className="font-bold text-stone-700">${cartTotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span className="text-emerald-600 font-bold">{cartTotal > 150 ? 'FREE' : '$15.00'}</span>
-                  </div>
-                  <div className="border-t border-stone-200 pt-3 flex justify-between items-center">
-                    <span className="text-stone-900 font-serif font-bold text-lg">Total</span>
-                    <span className="text-crescent-green font-bold text-xl md:text-2xl">${finalTotal.toFixed(2)}</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <button 
-                    disabled={cart.length === 0}
-                    onClick={() => setPage(Page.CHECKOUT)}
-                    className="w-full bg-crescent-green text-white font-bold py-4 rounded-lg hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed uppercase text-sm tracking-widest"
-                  >
-                    Proceed to Checkout <ArrowRight size={18} />
-                  </button>
-                  <p className="text-[9px] md:text-[10px] text-center text-stone-400">Secure payments powered by Stripe & PayPal. Shipped with care.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   const WholesalePage = () => (
     <div className="bg-stone-50 py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <button onClick={() => setPage(Page.SERVICES)} className="flex items-center gap-2 text-stone-500 hover:text-crescent-green mb-8 transition-colors">
-          <ChevronLeft size={20} /> Back to Services
+        <button onClick={() => setPage(Page.HOME)} className="flex items-center gap-2 text-stone-500 hover:text-crescent-green mb-8 transition-colors cursor-pointer">
+          <ChevronLeft size={20} /> Back to Home
         </button>
         <div className="grid lg:grid-cols-2 gap-12">
           <div>
@@ -675,8 +265,8 @@ const App: React.FC = () => {
     return (
       <div className="bg-stone-50 py-16">
         <div className="max-w-7xl mx-auto px-4">
-          <button onClick={() => setPage(Page.SERVICES)} className="flex items-center gap-2 text-stone-500 hover:text-crescent-green mb-8 transition-colors">
-            <ChevronLeft size={20} /> Back to Services
+          <button onClick={() => setPage(Page.HOME)} className="flex items-center gap-2 text-stone-500 hover:text-crescent-green mb-8 transition-colors cursor-pointer">
+            <ChevronLeft size={20} /> Back to Home
           </button>
           
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-20">
@@ -980,14 +570,6 @@ const App: React.FC = () => {
               </li>
               <li>
                 <button 
-                  onClick={() => setPage(Page.SERVICES)} 
-                  className="hover:text-amber-300 transition-colors cursor-pointer text-left"
-                >
-                  Services
-                </button>
-              </li>
-              <li>
-                <button 
                   onClick={() => setPage(Page.ABOUT)} 
                   className="hover:text-amber-300 transition-colors cursor-pointer text-left"
                 >
@@ -1097,8 +679,6 @@ const App: React.FC = () => {
           />
         );
       }
-      case Page.SERVICES:
-        return <ServicesPage />;
       case Page.NEWSLETTER:
         return (
           <PlantCatalog 
@@ -1107,20 +687,38 @@ const App: React.FC = () => {
             onNavigatePage={setPage}
           />
         );
-      case Page.DROUGHT_RESISTANCE:
-        return <DroughtResistance />;
-      case Page.PLANTING_CALENDAR:
-        return <PlantingCalendar />;
-      case Page.NATIVE_SPECIES_MAP:
-        return <NativeSpeciesMap />;
-      case Page.SUSTAINABILITY_POLICY:
-        return <SustainabilityPolicy />;
       case Page.AVAILABILITY:
-        return <AvailabilityList onBack={() => setPage(Page.HOME)} />;
+        return (
+          <AvailabilityList 
+            onBack={() => setPage(Page.HOME)} 
+            isPriced={false}
+            onRequestPriced={() => {
+              if (tradeAuth?.authenticated) {
+                setPage(Page.PRICED_AVAILABILITY);
+              } else {
+                setShowTradeSignInModal(true);
+              }
+            }}
+          />
+        );
+      case Page.PRICED_AVAILABILITY:
+        return (
+          <AvailabilityList 
+            onBack={() => setPage(Page.HOME)} 
+            isPriced={true}
+            companyName={tradeAuth?.companyName}
+            onSignOut={() => {
+              setTradeAuth(null);
+              try {
+                localStorage.removeItem('crescent_trade_auth');
+                sessionStorage.removeItem('crescent_trade_auth');
+              } catch (e) {}
+              setPage(Page.AVAILABILITY);
+            }}
+          />
+        );
       case Page.EVENTS_CALENDAR:
         return <EventsCalendar onBack={() => setPage(Page.HOME)} />;
-      case Page.MAIL_ORDER:
-        return <MailOrderPage />;
       case Page.WHOLESALE:
         return <WholesalePage />;
       case Page.CONSULTATION:
@@ -1129,8 +727,6 @@ const App: React.FC = () => {
         return <AboutPage />;
       case Page.CONTACT:
         return <ContactPage />;
-      case Page.CHECKOUT:
-        return <CheckoutPage />;
       default:
         return <Hero />;
     }
@@ -1140,15 +736,22 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-[#fcfaf6] flex flex-col font-sans selection:bg-[#cb6228] selection:text-white">
       <Navbar 
         currentPage={currentPage} 
-        setPage={setPage} 
-        cartCount={cart.length} 
-        onCartClick={handleCartIconClick}
+        setPage={handleNavigate} 
       />
       <main className="flex-grow">
         {renderPage()}
       </main>
       <Footer />
       <PricedAvailabilityModal />
+      <TradeSignInModal
+        isOpen={showTradeSignInModal}
+        onClose={() => setShowTradeSignInModal(false)}
+        onSuccess={(companyName) => {
+          setTradeAuth({ companyName, authenticated: true });
+          setShowTradeSignInModal(false);
+          setPage(Page.PRICED_AVAILABILITY);
+        }}
+      />
     </div>
   );
 };

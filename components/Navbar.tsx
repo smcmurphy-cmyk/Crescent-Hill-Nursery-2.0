@@ -22,8 +22,8 @@ import {
 interface NavbarProps {
   currentPage: Page;
   setPage: (page: Page) => void;
-  cartCount: number;
-  onCartClick: () => void;
+  cartCount?: number;
+  onCartClick?: () => void;
 }
 
 export const FramedEmblemLogo: React.FC<{ className?: string; textColor?: string }> = ({ 
@@ -102,12 +102,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, setPage, cartCount,
     { label: 'Our Plants & Catalog', value: Page.CATALOG, icon: Leaf },
     { label: 'Events & Calendar', value: Page.EVENTS_CALENDAR, icon: Calendar },
     { label: 'Availability List', value: Page.AVAILABILITY, icon: FileText },
-    { label: 'Mail Order Arrangements', value: Page.MAIL_ORDER, icon: Sparkles },
-    { label: 'Drought Resistance Guide', value: Page.DROUGHT_RESISTANCE, icon: ShieldCheck },
-    { label: 'Central Coast Planting Calendar', value: Page.PLANTING_CALENDAR, icon: Calendar },
-    { label: 'Native Species Range Map', value: Page.NATIVE_SPECIES_MAP, icon: MapPin },
-    { label: 'Sustainability Policy', value: Page.SUSTAINABILITY_POLICY, icon: Leaf },
-    { label: 'Nursery Services', value: Page.SERVICES, icon: Truck },
     { label: 'About Us', value: Page.ABOUT, icon: Sparkles },
     { label: 'Contact & Directions', value: Page.CONTACT, icon: Phone },
   ];
@@ -177,24 +171,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, setPage, cartCount,
               <FramedEmblemLogo />
             </div>
 
-            {/* Right Controls: Cart, Contact Us button, Menu button */}
+            {/* Right Controls: Contact Us button, Menu button */}
             <div className="flex items-center gap-3 sm:gap-4">
-              
-              {/* Shopping Cart Button */}
-              <button 
-                onClick={onCartClick}
-                className="relative p-2.5 text-stone-700 hover:text-[#cb6228] transition-colors rounded-lg hover:bg-stone-100/70"
-                aria-label="View shopping cart"
-                title="View Shopping Cart"
-              >
-                <ShoppingCart size={22} />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#cb6228] text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-in zoom-in duration-200">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-
               {/* Contact Us Button (Rust Orange matching mockup) */}
               <button
                 onClick={() => setPage(Page.CONTACT)}

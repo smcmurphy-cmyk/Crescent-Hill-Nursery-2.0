@@ -2,19 +2,13 @@ export enum Page {
   HOME = 'HOME',
   CATALOG = 'CATALOG',
   PLANT_DETAIL = 'PLANT_DETAIL',
-  SERVICES = 'SERVICES',
   ABOUT = 'ABOUT',
   CONTACT = 'CONTACT',
-  MAIL_ORDER = 'MAIL_ORDER',
   WHOLESALE = 'WHOLESALE',
   CONSULTATION = 'CONSULTATION',
-  CHECKOUT = 'CHECKOUT',
   NEWSLETTER = 'NEWSLETTER',
-  DROUGHT_RESISTANCE = 'DROUGHT_RESISTANCE',
-  PLANTING_CALENDAR = 'PLANTING_CALENDAR',
-  NATIVE_SPECIES_MAP = 'NATIVE_SPECIES_MAP',
-  SUSTAINABILITY_POLICY = 'SUSTAINABILITY_POLICY',
   AVAILABILITY = 'AVAILABILITY',
+  PRICED_AVAILABILITY = 'PRICED_AVAILABILITY',
   EVENTS_CALENDAR = 'EVENTS_CALENDAR',
 }
 
@@ -50,22 +44,6 @@ export interface Plant {
   features?: string[];
 }
 
-export interface FloralArrangement {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  imageUrl: string;
-}
-
-export interface Service {
-  id: string;
-  title: string;
-  description: string;
-  iconName: string;
-  page: Page;
-}
-
 export interface NewsletterIssue {
   month: string;
   title: string;
@@ -79,8 +57,13 @@ export interface NewsletterArchive {
 
 export interface AvailabilityItem {
   name: string;
+  qty1g?: number;
   price1g?: string;
+  qty2g?: number;
   price2g?: string;
+  sizeNote2g?: string;
+  qty5g?: number;
   price5g?: string;
-  condition: string;
+  sizeNote5g?: string;
+  description: string;
 }
