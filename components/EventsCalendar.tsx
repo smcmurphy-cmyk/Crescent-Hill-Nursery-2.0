@@ -4,19 +4,11 @@ import {
   MapPin, 
   Clock, 
   Filter, 
-  FileText, 
-  ArrowLeft, 
   Check, 
-  CalendarPlus, 
-  Download, 
-  Share2, 
-  X,
-  ExternalLink,
-  ChevronRight,
-  Info
+  CalendarPlus
 } from 'lucide-react';
 
-export type EventCategory = 'All' | 'Workshop' | 'Sale' | 'Community' | 'Class' | 'Special Event';
+export type EventCategory = 'All' | 'Special Event';
 
 export interface DirectEvent {
   id: string;
@@ -28,11 +20,8 @@ export interface DirectEvent {
   time: string;
   location: string;
   description: string;
-  category: 'Workshop' | 'Sale' | 'Community' | 'Class' | 'Special Event';
+  category: 'Special Event';
   isPast: boolean;
-  hasPdf: boolean;
-  pdfTitle?: string;
-  plantHighlights?: string[];
 }
 
 const EVENTS_DATA: DirectEvent[] = [
@@ -40,129 +29,51 @@ const EVENTS_DATA: DirectEvent[] = [
     id: 'moss-landing-street-fair',
     title: 'Moss Landing Street Fair',
     month: 'JUL',
-    day: '26',
-    year: '2024',
-    dateString: 'July 26, 2024',
-    time: '8:00 AM - 5:00 PM',
+    day: '25',
+    year: '2027',
+    dateString: 'July 25, 2027',
+    time: '7:00 AM - 4:00 PM',
     location: 'Moss Landing Harbor District · Moss Landing, CA',
     description: 'Join us in historic Moss Landing for a vibrant day of art, antiques, delicious coastal food, and direct nursery plant offerings! Meet our head growers and shop rare Mediterranean shrubs, flowering maples, and California natives at special fair prices.',
     category: 'Special Event',
-    isPast: true,
-    hasPdf: true,
-    pdfTitle: 'Moss Landing Street Fair - Nursery Guide.pdf',
-    plantHighlights: ["Abutilon 'Crouching Tiger'", "Salvia 'Amistad'", "Protea 'Pink Ice'", "Dudleya brittonii"]
+    isPast: false
   },
   {
     id: 'benicia-peddlers-fair',
     title: 'Benicia Peddlers Fair',
     month: 'AUG',
-    day: '10',
-    year: '2024',
-    dateString: 'August 10, 2024',
+    day: '14',
+    year: '2027',
+    dateString: 'August 14, 2027',
     time: '8:00 AM - 5:00 PM',
     location: 'First Street Downtown · Benicia, CA',
     description: "One of Northern California's premier outdoor antique and artisan fairs. Crescent Hill Nursery will feature wholesale-direct selections of rare shrubs, flowering maples (Abutilons), Proteas, and drought-tolerant perennials.",
     category: 'Special Event',
-    isPast: true,
-    hasPdf: true,
-    pdfTitle: 'Benicia Peddlers Fair - Plant Specimen List.pdf',
-    plantHighlights: ["Grevillea 'Moonlight'", "Abutilon 'Tiger Eye'", "Acacia 'Cousin Itt'", "Leucadendron 'Safari Sunset'"]
+    isPast: false
   },
   {
     id: 'carmel-homecrafters-marketplace',
     title: 'Carmel Homecrafters Marketplace',
     month: 'NOV',
-    day: '21',
-    year: '2026',
-    dateString: 'November 21, 2026',
+    day: '20',
+    year: '2027',
+    dateString: 'November 20, 2027',
     time: '9:00 AM - 3:00 PM',
     location: 'Sunset Center, 8th & San Carlos · Carmel-by-the-Sea, CA',
     description: 'Join us at the legendary Carmel Homecrafters Marketplace. We will be bringing our finest signature floral arrangements, holiday botanical centerpieces, and a curated selection of winter-hardy California natives at direct-grower pricing.',
     category: 'Special Event',
-    isPast: false,
-    hasPdf: true,
-    pdfTitle: 'Carmel Homecrafters Marketplace - Event Flyer.pdf',
-    plantHighlights: ["Winter King Proteas", "Native Coastal Lilies", "Drought-Hardy Succulent Bowls", "Holiday Eucalyptus Bunches"]
-  },
-  {
-    id: 'native-seed-sowing-workshop',
-    title: 'Native Seed Sowing & Propagation Workshop',
-    month: 'JAN',
-    day: '15',
-    year: '2024',
-    dateString: 'January 15, 2024',
-    time: '10:00 AM - 1:00 PM',
-    location: 'Crescent Hill Main Greenhouse · Aromas, CA',
-    description: 'Learn the secrets of collecting, stratifying, and propagating California native wildflowers and shrubs from seed. Hands-on laboratory with seed starter flats provided to all attendees.',
-    category: 'Workshop',
-    isPast: true,
-    hasPdf: true,
-    pdfTitle: 'Seed Sowing Workshop Handbook.pdf',
-    plantHighlights: ["California Poppy (Eschscholzia)", "Blue Wild Indigo", "California Fuchsia", "Showy Milkweed"]
-  },
-  {
-    id: 'spring-wholesale-direct-blowout',
-    title: 'Spring Wholesale Direct Blowout Sale',
-    month: 'MAY',
-    day: '18',
-    year: '2024',
-    dateString: 'May 18, 2024',
-    time: '8:00 AM - 4:00 PM',
-    location: 'Crescent Hill Nursery Grounds · Aromas, CA',
-    description: 'Our annual seasonal kickoff where the full wholesale growing grounds open to retail enthusiasts at volume pricing. Thousands of 1-gallon and 5-gallon specimens available directly off the benches.',
-    category: 'Sale',
-    isPast: true,
-    hasPdf: true,
-    pdfTitle: 'Spring Wholesale Direct Price Guide.pdf',
-    plantHighlights: ["1-Gallon Perennials", "5-Gallon Specimen Shrubs", "Hummingbird Attractors", "Native Grasses"]
-  },
-  {
-    id: 'drought-tolerant-design-class',
-    title: 'Drought-Tolerant Landscape Design Masterclass',
-    month: 'APR',
-    day: '13',
-    year: '2024',
-    dateString: 'April 13, 2024',
-    time: '11:00 AM - 2:00 PM',
-    location: 'Main Demonstration Garden · Aromas, CA',
-    description: 'Practical guide to establishing low-water, fire-resilient Mediterranean gardens. Covers hydro-zoning, organic mulching, drip irrigation best practices, and year-round floral bloom cycles.',
-    category: 'Class',
-    isPast: true,
-    hasPdf: true,
-    pdfTitle: 'Drought Tolerant Design Guidebook.pdf',
-    plantHighlights: ["Arctostaphylos 'Howard McMinn'", "Ceanothus 'Yankee Point'", "Salvia apiana", "Festuca californica"]
-  },
-  {
-    id: 'monterey-bay-pollinator-festival',
-    title: 'Monterey Bay Pollinator & Wildlife Fair',
-    month: 'SEP',
-    day: '28',
-    year: '2024',
-    dateString: 'September 28, 2024',
-    time: '10:00 AM - 3:00 PM',
-    location: 'Pacific Grove Community Park · Pacific Grove, CA',
-    description: 'Celebrating native bees, monarch butterflies, and hummingbirds with educational displays, botanical talks, and our mobile garden trailer loaded with nectar-rich plants.',
-    category: 'Community',
-    isPast: true,
-    hasPdf: true,
-    pdfTitle: 'Pollinator Fair Botanical Checklist.pdf',
-    plantHighlights: ["Asclepias speciosa", "Salvia leucantha", "Penstemon heterophyllus", "Epilobium canum"]
+    isPast: false
   }
 ];
 
 const CATEGORIES: EventCategory[] = [
   'All',
-  'Workshop',
-  'Sale',
-  'Community',
-  'Class',
   'Special Event'
 ];
 
 export const EventsCalendar: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [selectedCategory, setSelectedCategory] = useState<EventCategory>('All');
   const [showPastEvents, setShowPastEvents] = useState<boolean>(true);
-  const [activePdfModal, setActivePdfModal] = useState<DirectEvent | null>(null);
   const [addedCalendarId, setAddedCalendarId] = useState<string | null>(null);
 
   // Filter events based on active category and past events toggle
@@ -343,7 +254,7 @@ export const EventsCalendar: React.FC<{ onBack?: () => void }> = ({ onBack }) =>
                 <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
                   
                   <div>
-                    {/* Top Row: Category Badge + Status Badge + PDF Icon */}
+                    {/* Top Row: Category Badge + Status Badge */}
                     <div className="flex items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2 flex-wrap">
                         {/* Category Badge */}
@@ -362,18 +273,6 @@ export const EventsCalendar: React.FC<{ onBack?: () => void }> = ({ onBack }) =>
                           </span>
                         )}
                       </div>
-
-                      {/* PDF Flyer / Specimen List Icon in Top Right */}
-                      {event.hasPdf && (
-                        <button
-                          onClick={() => setActivePdfModal(event)}
-                          title="View & Download Event PDF Flyer"
-                          className="w-8 h-8 rounded-full bg-red-50 hover:bg-red-100 border border-red-200 flex items-center justify-center text-red-600 transition-all hover:scale-105 shrink-0 cursor-pointer shadow-xs"
-                          aria-label="View Event PDF flyer"
-                        >
-                          <FileText size={16} />
-                        </button>
-                      )}
                     </div>
 
                     {/* Title */}
@@ -382,7 +281,7 @@ export const EventsCalendar: React.FC<{ onBack?: () => void }> = ({ onBack }) =>
                     </h3>
 
                     {/* Location & Time */}
-                    <div className="space-y-1.5 mb-3.5 text-xs sm:text-sm text-stone-600">
+                    <div className="space-y-1.5 mb-4 text-xs sm:text-sm text-stone-600">
                       <div className="flex items-center gap-2">
                         <Clock size={14} className="text-[#cb6228] shrink-0" />
                         <span>{event.time}</span>
@@ -397,30 +296,10 @@ export const EventsCalendar: React.FC<{ onBack?: () => void }> = ({ onBack }) =>
                     <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-3">
                       {event.description}
                     </p>
-
-                    {/* Highlighted Plant Specimens */}
-                    {event.plantHighlights && event.plantHighlights.length > 0 && (
-                      <div className="mb-4 pt-3 border-t border-stone-100">
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5 flex items-center gap-1">
-                          <Info size={12} className="text-[#2d5a27]" />
-                          <span>Featured Plant Selections</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {event.plantHighlights.map((plant, idx) => (
-                            <span 
-                              key={idx}
-                              className="text-[11px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded border border-stone-200/60 font-medium"
-                            >
-                              {plant}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-3 mt-auto">
+                  <div className="pt-3 border-t border-stone-100 flex items-center gap-3 mt-auto">
                     <button
                       onClick={() => handleAddToCalendar(event)}
                       className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer ${
@@ -439,14 +318,6 @@ export const EventsCalendar: React.FC<{ onBack?: () => void }> = ({ onBack }) =>
                         </>
                       )}
                     </button>
-
-                    <button
-                      onClick={() => setActivePdfModal(event)}
-                      className="text-stone-500 hover:text-[#2d5a27] text-xs font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer"
-                    >
-                      <span>Flyer & Details</span>
-                      <ChevronRight size={14} />
-                    </button>
                   </div>
 
                 </div>
@@ -456,118 +327,6 @@ export const EventsCalendar: React.FC<{ onBack?: () => void }> = ({ onBack }) =>
         )}
 
       </div>
-
-      {/* PDF Flyer / Details Modal */}
-      {activePdfModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-stone-200 animate-in fade-in zoom-in-95 duration-200">
-            
-            {/* Modal Header */}
-            <div className="bg-[#2d5a27] text-white p-6 flex items-start justify-between">
-              <div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-xs font-semibold text-emerald-100 mb-2">
-                  <FileText size={13} />
-                  <span>Official Event Document</span>
-                </div>
-                <h3 className="text-2xl font-serif font-bold text-white">
-                  {activePdfModal.title}
-                </h3>
-                <p className="text-xs text-emerald-200 mt-1">
-                  {activePdfModal.dateString} · {activePdfModal.location}
-                </p>
-              </div>
-              
-              <button
-                onClick={() => setActivePdfModal(null)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6 space-y-5 text-stone-700">
-              
-              {/* PDF Preview Card */}
-              <div className="bg-[#f7f5ef] border border-stone-300/80 rounded-xl p-5 flex items-center gap-4">
-                <div className="w-14 h-16 bg-red-500 text-white rounded-lg flex flex-col items-center justify-center shrink-0 shadow-md font-bold">
-                  <FileText size={24} />
-                  <span className="text-[9px] uppercase tracking-wider mt-1">PDF</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-stone-900 text-sm truncate">
-                    {activePdfModal.pdfTitle || `${activePdfModal.title}.pdf`}
-                  </div>
-                  <div className="text-xs text-stone-500 mt-0.5">
-                    Official Flyer & Wholesale Direct Price List (2.4 MB)
-                  </div>
-                  <div className="text-xs text-emerald-700 font-semibold mt-1">
-                    Verified by Crescent Hill Nursery, Inc.
-                  </div>
-                </div>
-              </div>
-
-              {/* Event Description */}
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1.5">
-                  About This Show
-                </h4>
-                <p className="text-stone-600 text-sm leading-relaxed">
-                  {activePdfModal.description}
-                </p>
-              </div>
-
-              {/* Plant Highlights */}
-              {activePdfModal.plantHighlights && (
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
-                    Specimens Brought to Show
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    {activePdfModal.plantHighlights.map((p, i) => (
-                      <div key={i} className="flex items-center gap-1.5 bg-stone-50 p-2 rounded border border-stone-200/80">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#2d5a27]"></span>
-                        <span className="font-medium text-stone-800">{p}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Download / Print Actions */}
-              <div className="pt-4 border-t border-stone-200 flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() => {
-                    const blob = new Blob([
-                      `CRESCENT HILL NURSERY, INC.\n\nEvent: ${activePdfModal.title}\nDate: ${activePdfModal.dateString}\nTime: ${activePdfModal.time}\nLocation: ${activePdfModal.location}\n\nDescription:\n${activePdfModal.description}\n\nFeatured Plants:\n${activePdfModal.plantHighlights?.join('\n') || 'All catalog specimens'}\n\nContact: (831) 246-1128 | Crescent Hill Nursery, Inc.`
-                    ], { type: 'text/plain;charset=utf-8' });
-                    const link = document.createElement('a');
-                    link.href = window.URL.createObjectURL(blob);
-                    link.setAttribute('download', activePdfModal.pdfTitle || 'Event_Flyer.txt');
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }}
-                  className="flex-1 bg-[#2d5a27] hover:bg-[#234920] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md transition-colors cursor-pointer"
-                >
-                  <Download size={16} />
-                  <span>Download Flyer (PDF)</span>
-                </button>
-
-                <button
-                  onClick={() => handleAddToCalendar(activePdfModal)}
-                  className="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm border border-stone-300/80 transition-colors cursor-pointer"
-                >
-                  <CalendarPlus size={16} />
-                  <span>Add to Calendar</span>
-                </button>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-      )}
 
     </div>
   );
