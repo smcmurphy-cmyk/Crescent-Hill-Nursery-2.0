@@ -399,13 +399,13 @@ const App: React.FC = () => {
             <h2 className="text-5xl font-serif font-bold text-crescent-green mb-8">Rooted in the Rolling Hills</h2>
             <div className="prose prose-xl prose-stone text-stone-600 space-y-6">
               <p className="leading-relaxed">
-                Founded in 1998, Crescent Hill Nursery began with a simple mission: to cultivate and share the resilient beauty of Mediterranean and native flora.
+                Crescent Hill is located in a central corridor of ornamental nursery production, outside the fog belt, in Watsonville, California.
               </p>
               <p className="leading-relaxed">
-                Our nursery is more than a marketplace; it's a living laboratory where we test varieties for drought tolerance, beauty, and ecological contribution. 
+                We're based just minutes from either Highway 1 in Santa Cruz or Highway 152 if coming from the east. 
               </p>
               <p className="leading-relaxed">
-                Whether you're a professional landscaper or a first-time gardener, we're here to provide the specimens and the knowledge you need to build a legacy in your own backyard.
+                Set in a fertile apple-producing valley, between the picturesque Santa Cruz Mountains and scenic Monterey Bay, we are a wholesale nursery specializing in drought resistant plants for the Mediterranean Climate.
               </p>
               <div className="pt-8 flex items-center gap-6">
                  <div className="h-px flex-1 bg-stone-200"></div>
