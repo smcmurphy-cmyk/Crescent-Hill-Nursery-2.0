@@ -31,14 +31,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // High-reliability aerial drone video of lush terraced hillside nursery crops
-  const videoSrc = "https://assets.mixkit.co/videos/preview/mixkit-flying-over-a-green-hillside-with-trees-42588-large.mp4";
-
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // Fallback or retry
-      });
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.log("Autoplay was prevented, retrying with muted:", err);
+          if (videoRef.current) {
+            videoRef.current.muted = true;
+            videoRef.current.play().catch(() => {});
+          }
+        });
+      }
     }
   }, []);
 
@@ -53,20 +59,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           loop
           muted
           playsInline
+          preload="auto"
           disablePictureInPicture
-          poster="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2600&q=85"
-          className="absolute inset-0 w-full h-full object-cover object-center scale-[1.05] transform"
+          poster="/hero-poster.jpg"
+          className="absolute inset-0 w-full h-full object-cover object-center scale-[1.03] transform"
         >
-          <source src={videoSrc} type="video/mp4" />
-          {/* Fallback image if video fails to load */}
+          <source src="/hero-drone.mp4" type="video/mp4" />
+          <source src="/paso-robles-hills.webm" type="video/webm" />
+          {/* Fallback image if video fails */}
           <img 
-            src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2600&q=85" 
-            alt="Crescent Hill Nursery Terraces" 
+            src="/hero-poster.jpg" 
+            alt="Crescent Hill Nursery Landscape" 
             className="w-full h-full object-cover" 
           />
         </video>
 
-        {/* 2. Dual Contrast Overlays - keeps video clear while ensuring bold white & vibrant foreground text pops */}
+        {/* 2. Dual Contrast Overlays - keeps video vibrant and moving while ensuring bold white text pops */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/20"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30"></div>
         <div className="absolute inset-0 bg-[#0f240b]/20 mix-blend-multiply"></div>
