@@ -53,7 +53,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       
       {/* 1. Background Video Layer - Plays seamlessly on loop */}
       <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-        <video
+  <video
           ref={videoRef}
           autoPlay
           loop
@@ -61,14 +61,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           playsInline
           preload="auto"
           disablePictureInPicture
-          poster="/hero-poster.jpg"
+          poster={`${import.meta.env.BASE_URL}hero-poster.jpg`}
           className="absolute inset-0 w-full h-full object-cover object-center scale-[1.03] transform"
         >
-          <source src="/hero-drone.mp4" type="video/mp4" />
-          <source src="/paso-robles-hills.webm" type="video/webm" />
+          <source src={`${import.meta.env.BASE_URL}hero-drone.mp4`} type="video/mp4" />
+          <source src={`${import.meta.env.BASE_URL}paso-robles-hills.webm`} type="video/webm" />
           {/* Fallback image if video fails */}
           <img 
-            src="/hero-poster.jpg" 
+            src={`${import.meta.env.BASE_URL}hero-poster.jpg`} 
             alt="Crescent Hill Nursery Landscape" 
             className="w-full h-full object-cover" 
           />
