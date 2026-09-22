@@ -1,0 +1,11 @@
+{
+  "name": "crescent-hill-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-13",
+  "kv_namespaces": [
+    {
+      "binding": "CMS_CACHE",
+      "id": "51de2a5501b8480786ab620ed04ce6dd"
+    }
+  ]
+}

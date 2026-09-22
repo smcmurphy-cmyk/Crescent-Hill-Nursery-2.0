@@ -1,8 +1,0 @@
-{
-  "name": "Crescent Hill Nursery Clone",
-  "description": "A modern web application for Crescent Hill Nursery featuring an extensive Mediterranean & native plant catalog, availability list, and events calendar.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}

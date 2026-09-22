@@ -40,64 +40,14 @@ import {
   Leaf,
   Check
 } from 'lucide-react';
+
 export const App: React.FC = () => {
+  // 1. Live Inventory & Fetch State
   const [plants, setPlants] = useState<Plant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState<Page>({ type: 'catalog' });
 
-  useEffect(() => {
-    const fetchLiveInventory = async () => {
-      try {
-        const response = await fetch("https://crescent-hill-api.crescenthill8.workers.dev/api/plants");
-        if (!response.ok) throw new Error("Failed to load live nursery inventory.");
-        const data = await response.json();
-        setPlants(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unexpected error occurred.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchLiveInventory();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fbf9f5]">
-        <div className="w-12 h-12 border-4 border-[#24491e] border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fbf9f5]">
-        <p className="text-red-600 font-bold bg-red-50 p-4 rounded-lg border border-red-200">Error: {error}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#fbf9f5]">
-      {currentPage.type === 'catalog' && (
-        <PlantCatalog 
-          plants={plants} 
-          onSelectPlant={(plantId) => setCurrentPage({ type: 'detail', plantId })} 
-        />
-      )}
-      {currentPage.type === 'detail' && (
-        <PlantDetailView 
-          plantId={currentPage.plantId} 
-          plants={plants} 
-          onBack={() => setCurrentPage({ type: 'catalog' })} 
-        />
-      )}
-    </div>
-  );
-};
-const App: React.FC = () => {
+  // 2. Navigation & Modal State
   const [currentPage, setPage] = useState<Page>(Page.HOME);
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [showPricedModal, setShowPricedModal] = useState(false);
@@ -114,6 +64,24 @@ const App: React.FC = () => {
     } catch (e) {}
     return null;
   });
+
+  // Fetch live inventory from Cloudflare Worker on mount
+  useEffect(() => {
+    const fetchLiveInventory = async () => {
+      try {
+        const response = await fetch("https://crescent-hill-api.crescenthill8.workers.dev/api/plants");
+        if (!response.ok) throw new Error("Failed to load live nursery inventory.");
+        const data = await response.json();
+        setPlants(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLiveInventory();
+  }, []);
 
   // Social Links
   const INSTAGRAM_URL = "https://www.instagram.com/crescent_hill_nursery_?igsh=NTc4MTIwNjQ2TQ==";
@@ -375,7 +343,6 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* New "Our Designs" Section */}
           <div className="py-20 border-t border-stone-200">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 px-4 py-1 bg-crescent-light text-crescent-green rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
@@ -414,7 +381,6 @@ const App: React.FC = () => {
                     <p className="text-xs text-stone-500 leading-relaxed font-hand text-lg pt-2">{design.description}</p>
                   </div>
                   
-                  {/* Interactive Seal/Badge on Hover */}
                   <div className="absolute -bottom-4 -right-4 bg-crescent-green text-white w-16 h-16 rounded-full flex flex-col items-center justify-center scale-0 group-hover:scale-100 transition-transform duration-500 rotate-12 shadow-xl border-4 border-white">
                     <span className="text-[8px] font-bold leading-none uppercase">Project</span>
                     <span className="text-sm font-serif font-bold italic leading-none">Done</span>
@@ -559,7 +525,6 @@ const App: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
           
-          {/* Top Left: Logo, description, and social icons */}
           <div className="space-y-6">
             <div 
               className="cursor-pointer inline-flex items-center" 
@@ -601,48 +566,34 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Top Right: Explore */}
           <div className="space-y-4 md:pl-8 lg:pl-16">
             <h3 className="text-white font-serif font-bold text-xl sm:text-2xl">
               Explore
             </h3>
             <ul className="space-y-2.5 text-stone-200/90 text-sm sm:text-base">
               <li>
-                <button 
-                  onClick={() => setPage(Page.HOME)} 
-                  className="hover:text-amber-300 transition-colors cursor-pointer text-left"
-                >
+                <button onClick={() => setPage(Page.HOME)} className="hover:text-amber-300 transition-colors cursor-pointer text-left">
                   Home
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => setPage(Page.CATALOG)} 
-                  className="hover:text-amber-300 transition-colors cursor-pointer text-left"
-                >
+                <button onClick={() => setPage(Page.CATALOG)} className="hover:text-amber-300 transition-colors cursor-pointer text-left">
                   Plants & Products
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => setPage(Page.ABOUT)} 
-                  className="hover:text-amber-300 transition-colors cursor-pointer text-left"
-                >
+                <button onClick={() => setPage(Page.ABOUT)} className="hover:text-amber-300 transition-colors cursor-pointer text-left">
                   About Us
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => setPage(Page.CONTACT)} 
-                  className="hover:text-amber-300 transition-colors cursor-pointer text-left"
-                >
+                <button onClick={() => setPage(Page.CONTACT)} className="hover:text-amber-300 transition-colors cursor-pointer text-left">
                   Contact
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Bottom Left: Hours (Wholesale Only) */}
           <div className="space-y-4 pt-2 md:pt-4">
             <div className="flex items-center gap-2">
               <Clock size={20} className="text-white shrink-0" />
@@ -670,12 +621,10 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Bottom Right: Contact Us */}
           <div className="space-y-4 pt-2 md:pt-4 md:pl-8 lg:pl-16">
             <h3 className="text-white font-serif font-bold text-xl sm:text-2xl">
               Contact Us
             </h3>
-            
             <div className="space-y-3.5 text-stone-200/90 text-sm sm:text-base">
               <div className="flex items-start gap-3">
                 <MapPin size={19} className="text-[#cb6228] shrink-0 mt-1" />
@@ -685,14 +634,12 @@ const App: React.FC = () => {
                   <p className="text-stone-300/80 italic text-xs sm:text-sm mt-0.5">(Order pick-ups only)</p>
                 </div>
               </div>
-
               <div className="flex items-center gap-3">
                 <Phone size={19} className="text-[#cb6228] shrink-0" />
                 <a href="tel:8312461128" className="text-white hover:text-amber-300 transition-colors font-medium">
                   (831) 246-1128
                 </a>
               </div>
-
               <div className="flex items-center gap-3">
                 <Mail size={19} className="text-[#cb6228] shrink-0" />
                 <a href="mailto:crescenthillnursery@gmail.com" className="text-white hover:text-amber-300 transition-colors">
@@ -714,13 +661,14 @@ const App: React.FC = () => {
       case Page.CATALOG:
         return (
           <PlantCatalog 
+            plants={plants}
             selectedPlantId={selectedPlantId}
             onSelectPlantId={(id) => setSelectedPlantId(id)}
             onNavigatePage={setPage}
           />
         );
       case Page.PLANT_DETAIL: {
-        const activePlant = MOCK_PLANTS.find(p => p.id === selectedPlantId) || MOCK_PLANTS[0];
+        const activePlant = plants.find(p => p.id === selectedPlantId) || plants[0];
         return (
           <PlantDetailView 
             plant={activePlant}
@@ -737,6 +685,7 @@ const App: React.FC = () => {
       case Page.NEWSLETTER:
         return (
           <PlantCatalog 
+            plants={plants}
             selectedPlantId={selectedPlantId}
             onSelectPlantId={(id) => setSelectedPlantId(id)}
             onNavigatePage={setPage}
@@ -786,6 +735,26 @@ const App: React.FC = () => {
         return <Hero />;
     }
   };
+
+  // Optional Loading Spinner while fetching from Cloudflare worker
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fbf9f5]">
+        <div className="w-12 h-12 border-4 border-[#24491e] border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 font-serif text-[#1c3e17] text-lg">Loading Crescent Hill inventory...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fbf9f5]">
+        <p className="text-red-600 font-bold bg-red-50 p-4 rounded-lg border border-red-200">
+          Error: {error}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#fcfaf6] flex flex-col font-sans selection:bg-[#cb6228] selection:text-white">
