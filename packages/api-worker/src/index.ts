@@ -28,13 +28,8 @@ export default {
 
       try {
         const body = await request.json() as any;
-        
-        // Write the incoming data to KV Cache
         await env.CMS_CACHE.put("plant_catalog", JSON.stringify(body.plants));
         
-        // If you have a designs tab, uncomment this later:
-        // await env.CMS_CACHE.put("portfolio_designs", JSON.stringify(body.designs));
-
         return new Response(JSON.stringify({ success: true, message: "Cache updated" }), { 
           status: 200, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -44,7 +39,7 @@ export default {
       }
     }
 
-    // Public API Route: Serves cached data to the React frontend
+    // Public API Route: Serves normalized camelCase data to the React frontend
     if (request.method === "GET" && url.pathname === "/api/plants") {
       const cachedData = await env.CMS_CACHE.get("plant_catalog");
       
@@ -55,13 +50,32 @@ export default {
         });
       }
 
-      return new Response(cachedData, {
+      // Normalize keys to camelCase so the React frontend can read them properly
+      let normalizedPlants = [];
+      try {
+        const rawPlants = JSON.parse(cachedData);
+        normalizedPlants = rawPlants.map((row: any, index: number) => ({
+          id: row.id || row.ID || `plant-${index}`,
+          name: row.name || row.Name || 'Unnamed Plant',
+          botanicalName: row.botanicalName || row.botanicalname || row.BotanicalName || '',
+          commonName: row.commonName || row.commonname || row.CommonName || '',
+          category: row.category || row.Category || 'General',
+          price: row.price || row.Price || 0,
+          description: row.description || row.Description || '',
+          imageUrl: row.imageUrl || row.imageurl || row.ImageUrl || '',
+          sunNeeds: row.sunNeeds || row.sunneeds || row.SunNeeds || '',
+          waterNeeds: row.waterNeeds || row.waterneeds || row.WaterNeeds || '',
+        }));
+      } catch (e) {
+        normalizedPlants = [];
+      }
+
+      return new Response(JSON.stringify(normalizedPlants), {
         status: 200,
         headers: {
           ...corsHeaders,
           "Content-Type": "application/json",
-          // Forces browsers to cache the response for 5 minutes to save KV reads
-          "Cache-Control": "public, max-age=300" 
+          "Cache-Control": "public, max-age=300"
         }
       });
     }

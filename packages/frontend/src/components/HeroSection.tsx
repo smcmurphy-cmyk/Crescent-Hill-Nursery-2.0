@@ -64,7 +64,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           poster={`${import.meta.env.BASE_URL}hero-poster.jpg`}
           className="absolute inset-0 w-full h-full object-cover object-center scale-[1.03]"
         >
-          <source src={`${import.meta.env.BASE_URL}hero-drone.mp4`} type="video/mp4" />
+          <source src= "https://pub-30591568543a4fd2bb878083adf85921.r2.dev/hero-drone.mp4" type="video/mp4" />
           <source src={`${import.meta.env.BASE_URL}paso-robles-hills.webm`} type="video/webm" />
           {/* Fallback image if video fails */}
           <img 
