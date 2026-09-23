@@ -25,6 +25,7 @@ import {
 
 interface PlantDetailViewProps {
   plant: Plant;
+  plants?: Plant[];
   onBack: () => void;
   onSelectPlant?: (plant: Plant) => void;
   onNavigatePage?: (page: Page) => void;
@@ -33,6 +34,7 @@ interface PlantDetailViewProps {
 
 export const PlantDetailView: React.FC<PlantDetailViewProps> = ({
   plant,
+  plants,
   onBack,
   onSelectPlant,
   onNavigatePage,
