@@ -209,14 +209,25 @@ export const PlantDetailView: React.FC<PlantDetailViewProps> = ({
           {/* Left Column: Visual Gallery ("Images below") */}
           <div className="lg:col-span-7 space-y-4">
             
-            {/* Primary Featured Image */}
-            <div className="relative rounded-2xl overflow-hidden bg-[#ebe4d6] border border-[#ded5c3] shadow-md group aspect-[4/3]">
-              <img
-                src={gallery[selectedImageIndex] || plant.imageUrl}
-                alt={`${cleanBotanicalName} - view ${selectedImageIndex + 1}`}
-                className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700 cursor-zoom-in"
-                onClick={() => setIsLightboxOpen(true)}
-              />
+           {/* Primary Featured Image */}
+          <div className="relative rounded-2xl overflow-hidden bg-[#ebe4d6] border border-[#ded5c3] shadow-md group aspect-[4/3]">
+            {(() => {
+              const currentImg = gallery[selectedImageIndex] || plant.imageUrl;
+              const isValidImg = currentImg && currentImg.trim() !== "";
+
+              return isValidImg ? (
+                <img
+                  src={currentImg}
+                  alt={`${cleanBotanicalName} - view ${selectedImageIndex + 1}`}
+                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700 cursor-zoom-in"
+                  onClick={() => setIsLightboxOpen(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-stone-500 bg-stone-200 p-6 text-center">
+                  <span className="text-sm font-medium">No image available for this plant</span>
+                </div>
+              );
+            })()}
 
               {/* Tag Overlays */}
               <div className="absolute top-4 left-4 flex flex-col gap-1.5">
