@@ -55,15 +55,11 @@ export const PlantDetailView: React.FC<PlantDetailViewProps> = ({
   const varietyName = plant.name;
   const tag = plant.tag || (plant.waterNeeds === 'Low' ? 'Drought Tolerant' : 'Easy Care');
 
-// 1. Check if extra images exist; if not, use placeholders
-  const extraImages = plant.galleryImages 
-    ? plant.galleryImages.split(',').map(url => url.trim())
-    : [
-        `https://picsum.photos/seed/${plant.id}-foliage/1000/800`,
-        `https://picsum.photos/seed/${plant.id}-bloom/1000/800`,
-        `https://picsum.photos/seed/${plant.id}-landscape/1000/800`,
-      ];
-
+// 1. Check if extra images exist; if not, use an empty array
+const extraImages = plant.galleryImages 
+  ? plant.galleryImages.split(',').map(url => url.trim())
+  : [];
+  
   // 2. Always make the primary imageUrl the first thumbnail, followed by the extras
   const gallery = [plant.imageUrl, ...extraImages];
   // Specific botanical traits

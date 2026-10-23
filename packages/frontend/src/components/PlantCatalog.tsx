@@ -39,14 +39,26 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
   const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   const filteredPlants = useMemo(() => {
+  const searchLower = (searchTerm || "").toLowerCase();
+
     return plants.filter(plant => {
-      // If no letter filter is active (empty string), show all that match search
-      const matchesLetter = filter === '' || plant.name.toUpperCase().startsWith(filter);
-      const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            plant.botanicalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (plant.commonName ? plant.commonName.toLowerCase().includes(searchTerm.toLowerCase()) : false);
+      // 1. Create safe fallback strings in case a Google Sheet cell is completely blank
+      const safeName = plant.name || "";
+      const safeBotanical = plant.botanicalName || "";
+      const safeCommon = plant.commonName || "";
+
+      // 2. Safely check the letter filter
+      const matchesLetter = filter === '' || safeName.toUpperCase().startsWith(filter);
+      
+      // 3. Safely check the search terms
+      const matchesSearch = 
+        safeName.toLowerCase().includes(searchLower) || 
+        safeBotanical.toLowerCase().includes(searchLower) ||
+        safeCommon.toLowerCase().includes(searchLower);
+
       return matchesLetter && matchesSearch;
-    }).sort((a, b) => a.name.localeCompare(b.name));
+      
+    }).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   }, [filter, searchTerm, plants]);
 
   const handleLetterClick = (letter: string) => {
@@ -54,7 +66,7 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
     setFilter(prev => prev === letter ? '' : letter);
   };
 
-  // If a plant is active/selected, display the full plant page format
+// If a plant is active/selected, display the full plant page format
   if (activePlant) {
     return (
       <PlantDetailView
@@ -63,10 +75,11 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
         onBack={() => handleSelectPlant(null)}
         onSelectPlant={(newPlant) => handleSelectPlant(newPlant)}
         onNavigatePage={onNavigatePage}
-        onContactClick={() => onNavigatePage?.({ type: 'contact' } as Page)}
+        onContactClick={() => onNavigatePage?.(Page.CONTACT)} 
       />
     );
   }
+  
 
   return (
     <div className="bg-[#fbf9f5] py-10 px-4 sm:px-6 lg:px-8 min-h-screen text-[#2a2926]">
