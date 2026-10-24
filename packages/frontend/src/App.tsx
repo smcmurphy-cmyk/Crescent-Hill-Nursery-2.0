@@ -44,6 +44,7 @@ import {
 export const App: React.FC = () => {
   // 1. Live Inventory & Fetch State
   const [plants, setPlants] = useState<Plant[]>([]);
+  const [availabilityData, setAvailabilityData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,18 +65,30 @@ export const App: React.FC = () => {
     } catch (e) {}
     return null;
   });
-
-  // Fetch live inventory from Cloudflare Worker on mount
-  useEffect(() => {
+useEffect(() => {
     const fetchLiveInventory = async () => {
       try {
-        const response = await fetch("https://crescent-hill-api.crescenthill8.workers.dev/api/plants");
-        if (!response.ok) throw new Error("Failed to load live nursery inventory.");
+        const response = await fetch('https://crescent-hill-api.crescenthill8.workers.dev/api/plants');
         const data = await response.json();
-        setPlants(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+        
+        // Check if we are receiving the new combined payload format
+        if (data && data.plants && data.availability) {
+          // Set the master catalog
+          const validPlants = data.plants.filter((p: Plant) => p && p.id && p.name);
+          setPlants(validPlants);
+          
+          // Set the field availability list
+          const validAvailability = data.availability.filter((a: any) => a && a.id);
+          setAvailabilityData(validAvailability); 
+        } 
+        else if (Array.isArray(data)) {
+          // Fallback for the old format just in case
+          setPlants(data.filter((p: Plant) => p && p.id && p.name));
+        }
+      } catch (error) {
+        console.error('Error fetching inventory:', error);
       } finally {
+        
         setIsLoading(false);
       }
     };
