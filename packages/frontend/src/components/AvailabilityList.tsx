@@ -6,9 +6,29 @@ import {
   ArrowLeft, 
   PackageCheck,
   ShieldCheck,
-  Lock
+  Lock,
+  ArrowRight
 } from 'lucide-react';
 
+// ADD THE INTERFACE HERE
+export interface AvailabilityItem {
+  id: string;
+  name?: string;
+  botanicalName?: string;
+  description?: string;
+  price1g?: string;
+  qty1g?: string | number;
+  sizeNote1g?: string;
+  price2g?: string;
+  qty2g?: string | number;
+  sizeNote2g?: string;
+  price5g?: string;
+  qty5g?: string | number;
+  sizeNote5g?: string;
+  priceSpecial?: string;
+  qtySpecial?: string | number;
+  sizeNoteSpecial?: string;
+}
 export const AvailabilityList: React.FC<{ 
   plants: Plant[];            
   activeInventory: any[];     
@@ -20,6 +40,9 @@ export const AvailabilityList: React.FC<{
 }> = ({ plants, activeInventory, onBack, isPriced = false, companyName, onSignOut, onRequestPriced }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sizeFilter, setSizeFilter] = useState<'all' | '1g' | '2g' | '5g' | 'special'>('all');
+  const [letterFilter, setLetterFilter] = useState<string>('');
+
+  const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   // 1. Stitch the field data and master data together
   const combinedData = useMemo(() => {
@@ -34,14 +57,20 @@ export const AvailabilityList: React.FC<{
     });
   }, [activeInventory, plants]);
 
-  // 2. Filter the combined data based on search and size tabs
+  // 2. Filter the combined data based on search, size tabs, and letter
   const filteredData = useMemo(() => {
     return combinedData.filter(item => {
       const searchLower = (searchTerm || '').toLowerCase();
+      const safeName = item.name || '';
+      
+      const matchesLetter = letterFilter === '' || safeName.toUpperCase().startsWith(letterFilter);
+      if (!matchesLetter) return false;
+
       const matchesSearch = 
-        (item.name || '').toLowerCase().includes(searchLower) ||
+        safeName.toLowerCase().includes(searchLower) ||
         (item.botanicalName || '').toLowerCase().includes(searchLower) ||
         (item.description || '').toLowerCase().includes(searchLower) ||
+        (item.sizeNote1g || '').toLowerCase().includes(searchLower) ||
         (item.sizeNote2g || '').toLowerCase().includes(searchLower) ||
         (item.sizeNote5g || '').toLowerCase().includes(searchLower) ||
         (item.sizeNoteSpecial || '').toLowerCase().includes(searchLower);
@@ -56,7 +85,60 @@ export const AvailabilityList: React.FC<{
 
       return true;
     });
-  }, [searchTerm, sizeFilter, combinedData]);
+  }, [searchTerm, sizeFilter, letterFilter, combinedData]);
+
+  const handleLetterClick = (letter: string) => {
+    setLetterFilter(prev => prev === letter ? '' : letter);
+  };
+
+  const getNextLetter = () => {
+    if (!letterFilter) return null;
+    const currentIndex = ALPHABET.indexOf(letterFilter);
+    for (let i = currentIndex + 1; i < ALPHABET.length; i++) {
+      const letter = ALPHABET[i];
+      // Check if this upcoming letter actually has items in the current size filter/inventory
+      const hasPlants = combinedData.some(p => (p.name || '').toUpperCase().startsWith(letter));
+      if (hasPlants) return letter;
+    }
+    return null;
+  };
+
+  const nextLetter = getNextLetter();
+
+  const handleNextLetterClick = () => {
+    if (nextLetter) {
+      setLetterFilter(nextLetter);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const renderAlphabetPicker = () => (
+    <div className="flex flex-wrap gap-1.5 w-full bg-white p-3 rounded-xl border border-stone-200 shadow-sm mt-4">
+      <button
+        onClick={() => handleLetterClick('')}
+        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          letterFilter === ''
+            ? 'bg-[#2a4521] text-white shadow-xs'
+            : 'bg-stone-100 text-stone-500 hover:text-stone-800 border border-stone-200'
+        }`}
+      >
+        ALL
+      </button>
+      {ALPHABET.map((letter) => (
+        <button
+          key={letter}
+          onClick={() => handleLetterClick(letter)}
+          className={`px-2.5 py-1.5 min-w-[2.1rem] rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            letterFilter === letter 
+              ? 'bg-[#2a4521] text-white shadow-xs scale-105 z-10' 
+              : 'bg-stone-100 text-stone-500 hover:text-stone-800 border border-stone-200'
+          }`}
+        >
+          {letter}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div className="bg-[#fcfbf9] min-h-screen py-10 px-4 sm:px-6 lg:px-8">
@@ -114,7 +196,7 @@ export const AvailabilityList: React.FC<{
                 onClick={() => setSizeFilter('all')}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${sizeFilter === 'all' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}
               >
-                All ({combinedData.length})
+                All
               </button>
               <button
                 onClick={() => setSizeFilter('1g')}
@@ -164,6 +246,11 @@ export const AvailabilityList: React.FC<{
               <span className="sm:hidden text-xs font-semibold">Print</span>
             </button>
           </div>
+        </div>
+
+        {/* Top Alphabet Picker */}
+        <div className="mb-8">
+          {renderAlphabetPicker()}
         </div>
 
         {/* Banner Section */}
@@ -216,7 +303,7 @@ export const AvailabilityList: React.FC<{
             <thead>
               <tr className="bg-stone-50 border-b border-stone-200 text-[11px] font-bold text-stone-500 uppercase tracking-wider">
                 <th className="px-4 py-4 w-3/12 min-w-[200px]">Scientific / Plant Name</th>
-                <th className="px-3 py-4 w-2/12 text-center min-w-[100px]">1 Gallon</th>
+                <th className="px-3 py-4 w-2/12 text-center min-w-[100px]">1 Gal</th>
                 <th className="px-3 py-4 w-2/12 text-center min-w-[100px]">2 Gal</th>
                 <th className="px-3 py-4 w-2/12 text-center min-w-[100px]">5 Gal</th>
                 <th className="px-3 py-4 w-2/12 text-center min-w-[120px]">Special Size</th>
@@ -229,7 +316,6 @@ export const AvailabilityList: React.FC<{
                   key={`${item.id}-${idx}`} 
                   className="hover:bg-amber-50/40 transition-colors group text-sm"
                 >
-                  {/* Scientific Name */}
                   <td className="px-4 py-3.5 font-bold text-stone-900 font-serif text-base group-hover:text-[#2a4521] transition-colors">
                     {item.name}
                     {item.botanicalName && (
@@ -238,36 +324,46 @@ export const AvailabilityList: React.FC<{
                       </span>
                     )}
                   </td>
-
-                  {/* 1 Gallon Column */}
-                  <td className="px-3 py-3.5 text-center">
+                 <td className="px-3 py-3.5 text-center">
                     {isPriced ? (
                       item.price1g ? (
                         <div className="inline-flex flex-col items-center">
                           <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md text-xs border border-emerald-100 font-mono">
                             {item.price1g}
                           </span>
-                          {item.qty1g !== undefined && item.qty1g !== "" && (
-                            <span className="text-[11px] text-stone-500 mt-0.5 font-medium">
-                              {item.qty1g} in stock
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1 mt-0.5">
+                            {item.qty1g !== undefined && item.qty1g !== "" && (
+                              <span className="text-[11px] text-stone-500 font-medium">
+                                {item.qty1g} in stock
+                              </span>
+                            )}
+                            {item.sizeNote1g && (
+                              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1 rounded border border-amber-200">
+                                {item.sizeNote1g}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       ) : (
                         <span className="text-stone-300 font-light">—</span>
                       )
                     ) : (
                       item.price1g || item.qty1g ? (
-                        <span className="inline-block bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold px-2.5 py-1 rounded-md">
-                          Available
-                        </span>
+                        <div className="inline-flex flex-col items-center gap-1">
+                          <span className="inline-block bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold px-2.5 py-1 rounded-md">
+                            Available
+                          </span>
+                          {item.sizeNote1g && (
+                            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                              {item.sizeNote1g}
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-stone-300 font-light">—</span>
                       )
                     )}
                   </td>
-
-                  {/* 2 Gallon Column */}
                   <td className="px-3 py-3.5 text-center">
                     {isPriced ? (
                       item.price2g ? (
@@ -308,8 +404,6 @@ export const AvailabilityList: React.FC<{
                       )
                     )}
                   </td>
-
-                  {/* 5 Gallon Column */}
                   <td className="px-3 py-3.5 text-center">
                     {isPriced ? (
                       item.price5g ? (
@@ -350,8 +444,6 @@ export const AvailabilityList: React.FC<{
                       )
                     )}
                   </td>
-
-                  {/* Special Size Column */}
                   <td className="px-3 py-3.5 text-center">
                     {isPriced ? (
                       item.priceSpecial ? (
@@ -392,8 +484,6 @@ export const AvailabilityList: React.FC<{
                       )
                     )}
                   </td>
-
-                  {/* Condition / Description */}
                   <td className="px-4 py-3.5">
                     <span className="text-xs text-stone-600 font-medium leading-snug inline-block">
                       {item.description}
@@ -404,12 +494,30 @@ export const AvailabilityList: React.FC<{
               {filteredData.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-20 text-center text-stone-400 italic">
-                    No plants found matching "{searchTerm}".
+                    No plants found matching your search criteria.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Next Letter Action */}
+        {nextLetter && filteredData.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <button 
+              onClick={handleNextLetterClick}
+              className="group flex items-center gap-2 px-6 py-3 bg-[#2a4521] hover:bg-[#1a2e14] text-white rounded-full font-bold shadow-md transition-all cursor-pointer"
+            >
+              Continue to '{nextLetter}' 
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        )}
+
+        {/* Bottom Alphabet Picker */}
+        <div className="mt-8">
+          {renderAlphabetPicker()}
         </div>
 
         {/* Bottom Legend & Contact */}

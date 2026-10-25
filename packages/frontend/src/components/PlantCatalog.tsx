@@ -4,7 +4,7 @@ import { Search, Sun, Droplets, X, Sparkles, ArrowRight } from 'lucide-react';
 import { PlantDetailView } from './PlantDetailView';
 
 interface PlantCatalogProps {
-  plants: Plant[]; // Added live plants prop
+  plants: Plant[]; 
   selectedPlantId?: string | null;
   onSelectPlantId?: (id: string | null) => void;
   onNavigatePage?: (page: Page) => void;
@@ -16,12 +16,12 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
   onSelectPlantId,
   onNavigatePage
 }) => {
-  // Initialize filter as empty string to show all plants by default
   const [filter, setFilter] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [internalSelectedPlant, setInternalSelectedPlant] = useState<Plant | null>(null);
 
-  // If a selectedPlantId prop is passed, find that plant from live data
+  const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
   const activePlant = useMemo(() => {
     if (selectedPlantId) {
       return plants.find(p => p.id === selectedPlantId) || null;
@@ -36,21 +36,16 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
     setInternalSelectedPlant(plant);
   };
 
-  const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
   const filteredPlants = useMemo(() => {
-  const searchLower = (searchTerm || "").toLowerCase();
+    const searchLower = (searchTerm || "").toLowerCase();
 
     return plants.filter(plant => {
-      // 1. Create safe fallback strings in case a Google Sheet cell is completely blank
       const safeName = plant.name || "";
       const safeBotanical = plant.botanicalName || "";
       const safeCommon = plant.commonName || "";
 
-      // 2. Safely check the letter filter
       const matchesLetter = filter === '' || safeName.toUpperCase().startsWith(filter);
       
-      // 3. Safely check the search terms
       const matchesSearch = 
         safeName.toLowerCase().includes(searchLower) || 
         safeBotanical.toLowerCase().includes(searchLower) ||
@@ -62,16 +57,63 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
   }, [filter, searchTerm, plants]);
 
   const handleLetterClick = (letter: string) => {
-    // Toggle filter: if same letter is clicked, clear the filter
     setFilter(prev => prev === letter ? '' : letter);
   };
 
-// If a plant is active/selected, display the full plant page format
+  // Determine the next valid letter with inventory data
+  const getNextLetter = () => {
+    if (!filter) return null;
+    const currentIndex = ALPHABET.indexOf(filter);
+    for (let i = currentIndex + 1; i < ALPHABET.length; i++) {
+      const letter = ALPHABET[i];
+      const hasPlants = plants.some(p => (p.name || '').toUpperCase().startsWith(letter));
+      if (hasPlants) return letter;
+    }
+    return null;
+  };
+
+  const nextLetter = getNextLetter();
+
+  const handleNextLetterClick = () => {
+    if (nextLetter) {
+      setFilter(nextLetter);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const renderAlphabetPicker = () => (
+    <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 w-full max-w-2xl">
+      <button
+        onClick={() => handleLetterClick('')}
+        className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+          filter === ''
+            ? 'bg-[#24491e] text-white shadow-xs'
+            : 'bg-[#f8f5ee] text-[#524e43] hover:bg-[#eae4d4] border border-[#ded5c3]'
+        }`}
+      >
+        ALL
+      </button>
+      {ALPHABET.map((letter) => (
+        <button
+          key={letter}
+          onClick={() => handleLetterClick(letter)}
+          className={`px-2.5 py-1.5 min-w-[2.1rem] rounded-md text-xs font-bold transition-all cursor-pointer ${
+            filter === letter 
+              ? 'bg-[#24491e] text-white shadow-xs scale-105 z-10' 
+              : 'bg-[#f8f5ee] text-[#524e43] hover:bg-[#eae4d4] border border-[#ded5c3]'
+          }`}
+        >
+          {letter}
+        </button>
+      ))}
+    </div>
+  );
+
   if (activePlant) {
     return (
       <PlantDetailView
         plant={activePlant}
-        plants={plants} // Pass live plants list if detail view needs it for related items
+        plants={plants} 
         onBack={() => handleSelectPlant(null)}
         onSelectPlant={(newPlant) => handleSelectPlant(newPlant)}
         onNavigatePage={onNavigatePage}
@@ -80,7 +122,6 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
     );
   }
   
-
   return (
     <div className="bg-[#fbf9f5] py-10 px-4 sm:px-6 lg:px-8 min-h-screen text-[#2a2926]">
       <div className="max-w-7xl mx-auto">
@@ -100,32 +141,7 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
 
         {/* Controls */}
         <div className="mb-8 flex flex-col lg:flex-row justify-between items-center gap-6 bg-white p-5 rounded-2xl border border-[#ded5c3] shadow-xs">
-          {/* Alphabet Grid - Wrapping enabled to avoid scrollbar */}
-          <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 w-full max-w-2xl">
-            <button
-              onClick={() => setFilter('')}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
-                filter === ''
-                  ? 'bg-[#24491e] text-white shadow-xs'
-                  : 'bg-[#f8f5ee] text-[#524e43] hover:bg-[#eae4d4] border border-[#ded5c3]'
-              }`}
-            >
-              ALL
-            </button>
-            {ALPHABET.map((letter) => (
-              <button
-                key={letter}
-                onClick={() => handleLetterClick(letter)}
-                className={`px-2.5 py-1.5 min-w-[2.1rem] rounded-md text-xs font-bold transition-all ${
-                  filter === letter 
-                    ? 'bg-[#24491e] text-white shadow-xs scale-105 z-10' 
-                    : 'bg-[#f8f5ee] text-[#524e43] hover:bg-[#eae4d4] border border-[#ded5c3]'
-                }`}
-              >
-                {letter}
-              </button>
-            ))}
-          </div>
+          {renderAlphabetPicker()}
           
           {/* Search Bar */}
           <div className="relative w-full md:w-80 shrink-0">
@@ -140,7 +156,7 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
             {searchTerm && (
               <button 
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-3 text-[#857f71] hover:text-[#2a2926]"
+                className="absolute right-3 top-3 text-[#857f71] hover:text-[#2a2926] cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -220,6 +236,24 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
           ))}
         </div>
 
+        {/* Next Letter Action */}
+        {nextLetter && filteredPlants.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <button 
+              onClick={handleNextLetterClick}
+              className="group flex items-center gap-2 px-6 py-3 bg-[#24491e] hover:bg-[#1a3516] text-white rounded-full font-bold shadow-md transition-all cursor-pointer"
+            >
+              Continue to '{nextLetter}' 
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        )}
+
+        {/* Bottom Alphabet Picker */}
+        <div className="mt-8 bg-white p-5 rounded-2xl border border-[#ded5c3] shadow-xs flex justify-center lg:justify-start">
+          {renderAlphabetPicker()}
+        </div>
+
         {filteredPlants.length === 0 && (
           <div className="text-center py-20 bg-white rounded-2xl border border-[#ded5c3] border-dashed">
             <p className="text-xl text-[#6e685a] font-serif">
@@ -227,7 +261,7 @@ export const PlantCatalog: React.FC<PlantCatalogProps> = ({
             </p>
             <button 
               onClick={() => {setFilter(''); setSearchTerm('');}}
-              className="mt-4 px-6 py-2 bg-[#24491e] hover:bg-[#1a3516] text-white rounded-full font-bold transition-colors shadow-xs"
+              className="mt-4 px-6 py-2 bg-[#24491e] hover:bg-[#1a3516] text-white rounded-full font-bold transition-colors shadow-xs cursor-pointer"
             >
               Clear All Filters
             </button>

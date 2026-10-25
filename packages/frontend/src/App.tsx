@@ -704,9 +704,11 @@ useEffect(() => {
             onNavigatePage={setPage}
           />
         );
-      case Page.AVAILABILITY:
+case Page.AVAILABILITY:
         return (
           <AvailabilityList 
+            plants={plants}               // <--- Add this
+            activeInventory={availabilityData} // <--- Add this
             onBack={() => setPage(Page.HOME)} 
             isPriced={false}
             onRequestPriced={() => {
@@ -721,6 +723,8 @@ useEffect(() => {
       case Page.PRICED_AVAILABILITY:
         return (
           <AvailabilityList 
+            plants={plants}               // <--- Add this
+            activeInventory={availabilityData} // <--- Add this
             onBack={() => setPage(Page.HOME)} 
             isPriced={true}
             companyName={tradeAuth?.companyName}
@@ -734,6 +738,7 @@ useEffect(() => {
             }}
           />
         );
+        
       case Page.EVENTS_CALENDAR:
         return <EventsCalendar onBack={() => setPage(Page.HOME)} />;
       case Page.WHOLESALE:
